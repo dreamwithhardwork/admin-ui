@@ -10,22 +10,27 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import React from 'react';
-import Snackbar from '@material-ui/core/Snackbar';
-import MuiAlert from '@material-ui/lab/Alert';
-
-
+import {validate} from '../utis/validateusername'
 
 export default function LoginForm(props) {
 
+    //create refs to 
+    const [usernameValue,setUserNameValue] = React.useState("");
+    const [otpButton,setOtpButton] = React.useState(true);
+    const [passwordValue, setPasswordValue] = React.useState("");
+
+
     const classes = useStyles();
-    const [open, setOpen] = React.useState(false);
     const handleClose = () => {
-        setOpen(false);
+        console.log("This is working ")
     };
 
     const [loginTypeSwitch, setloginTypeSwitch] = React.useState(false);
     const handleLoginType = (event) => {
-        setloginTypeSwitch(event.target.checked)
+        setloginTypeSwitch(event.target.checked);
+        setUserNameValue("");
+        setPasswordValue("");
+        setOtpButton(true);
         passwordTypeLabel === "OTP*" ? setpasswordTypeLabel("Password*") : setpasswordTypeLabel("OTP*")
         passwordTypePaceholeder === "" ? setpasswordTypePaceholeder("__ __ __ __") : setpasswordTypePaceholeder("");
         passwordType === "password" ? setpasswordType("number") : setpasswordType("password");
@@ -36,19 +41,81 @@ export default function LoginForm(props) {
     const [passwordTypeLabel, setpasswordTypeLabel] = React.useState("Password*");
     const [passwordTypePaceholeder, setpasswordTypePaceholeder] = React.useState("");
     const [passwordType, setpasswordType] = React.useState("password");
-    const [snackBackopen, setsnackBackopen] = React.useState(false);
     const [linearprogress, setlinearprogress] = React.useState(false);
 
     const sendOtp = () => {
+        debugger;
+       setlinearprogress(true)
+       let res = validate(usernameValue);
+       let url;
+       if(res==="email"){
+          url = "http://localhost:8082/api/v1/otp/send/email/"+usernameValue;
+       }
+       else if(res === "mobile"){
+        url  = "http://localhost:8082/api/v1/otp/send/text/"+usernameValue;
+       }
+       else{
+         setlinearprogress(false)
+         return;
+       }
 
+       let response = fetch(url);
+       response.then((res) => {
+           res.text()
+       })
+       .then((data)=>{
+           setlinearprogress(false);
+           console.log(data);
+       })
+       .catch((err)=>{
+           setlinearprogress(false);
+           console.log(err);
+       })
+        
     }
 
     const login = () => {
+        let loginPayload = {
+            loginType: "",
+            otp: "",
+            username: ""
+          }
+        if(loginTypeSwitch){
+             loginPayload.loginType="OTP";
+             loginPayload.otp=passwordValue;
+             loginPayload.username=usernameValue;
+             console.log(JSON.stringify(loginPayload))
+             const requestOptions = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(loginPayload)
+            };
+            let  url = "http://localhost:8082/api/v1/user/login";
+           let response =   fetch(url,requestOptions)
+           response.then((res) => res.json())
+           .then((data) => {
+               console.log(data);
+           })
+           .catch((err)=>{
+               console.log(err)
+           })
+        }
+        
+
 
     }
 
-    const handleSnClose = () => {
-        
+
+    const handleUsernameChange = (event) => {
+        let value = event.target.value;
+        if(loginTypeSwitch && value.length > 3){
+            setOtpButton(false);
+        }
+        setUserNameValue(event.target.value)
+    }
+
+    const passwordChange = (event) => {
+        setPasswordValue(event.target.value)
     }
 
 
@@ -62,32 +129,21 @@ export default function LoginForm(props) {
                 <FormControlLabel
                     control={<Switch checked={loginTypeSwitch} onChange={handleLoginType} />} label="Login With OTP" />
                 <LinearProgress className={!linearprogress ? classes.displayNone : classes.displayBlock} color="secondary" />
-                <TextField autoFocus margin="dense" id="email-phone" label="Email/Phone*" type="email" variant="outlined" size="normal" fullWidth
+                <TextField value={usernameValue} onChange={handleUsernameChange} autoFocus margin="dense" id="email-phone" label="Email/Phone*" type="email" variant="outlined" fullWidth
                     InputProps={{
-                        endAdornment: <Button color="secondary" onClick={sendOtp} className={!loginTypeSwitch ? classes.displayNone : classes.displayBlock}>Get&nbsp;OTP</Button>
+                        endAdornment: <Button disabled={otpButton} id="otp" color="secondary" onClick={sendOtp} className={!loginTypeSwitch ? classes.displayNone : classes.displayBlock}>Get&nbsp;OTP</Button>
                     }} />
 
-                <TextField margin="dense" id="password" label={passwordTypeLabel} size="normal" placeholder={passwordTypePaceholeder} type={passwordType} variant="outlined" fullWidth />
+                <TextField value={passwordValue} onChange={passwordChange} margin="dense" id="password" label={passwordTypeLabel}  placeholder={passwordTypePaceholeder} type={passwordType} variant="outlined" fullWidth />
             </DialogContent>
 
 
             <DialogActions>
                 {props.children}
                 <Button onClick={login} color="primary">Login</Button>
-
             </DialogActions>
-
-            <Snackbar open={props.display} autoHideDuration={3000} onClose={handleSnClose}>
-                <Alert onClose={handleSnClose} severity="success">OTP sent to your email!</Alert>
-            </Snackbar>
 
         </Dialog>
     )
 
-}
-
-
-
-function Alert(props) {
-    return <MuiAlert elevation={6} variant="filled" {...props} />;
 }

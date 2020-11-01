@@ -18,7 +18,7 @@ export default function Header() {
         setOpen(true)
       }
     const handleClose = () => {
-        setOpen(false)
+        setOpen(false);
     }
     return (
         <div className={classes.root}>
