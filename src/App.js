@@ -1,0 +1,36 @@
+import logo from './logo.svg';
+import './App.css';
+import Header from '../src/components/headermenu';
+import SideMenu from '../src/components/sidemenu';
+import Footer from '../src/components/footer';
+function App() {
+  return (
+    <div className="App">
+       <Header></Header>
+       
+       <div style={{display:"flex"}}>
+       <SideMenu></SideMenu>
+       <div></div>
+       </div>
+       
+       <Footer></Footer>
+     
+     {/*  <header className="App-header">
+        <img src={logo} className="App-logo" alt="logo" />
+        <p>
+          Edit <code>src/App.js</code> and save to reload.
+        </p>
+        <a
+          className="App-link"
+          href="https://reactjs.org"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Learn React
+        </a>
+      </header> */}
+    </div>
+  );
+}
+
+export default App;
