@@ -7,11 +7,12 @@ import MenuIcon from '@material-ui/icons/Menu';
 import Button from '@material-ui/core/Button';
 import {useStyles} from '../utis/header';
 import LoginForm from './loginform';
+import {connect} from 'react-redux';
 
 
 
 
-export default function Header() {
+ function Header(props) {
     const classes = useStyles()
     const [open,setOpen] = React.useState(false)
     const handleClickOpen = () => {
@@ -29,13 +30,27 @@ export default function Header() {
                         <MenuIcon />
                     </IconButton>
                     <Typography variant="h6" className={classes.title}></Typography>
-                    <Button color="inherit" onClick={handleClickOpen}>Login</Button>
+                    
+                    <Button color="inherit" className={props.login?classes.displayNone:classes.displayBlock} onClick={handleClickOpen}>Login</Button>
                 </Toolbar>
             </AppBar>
-
+       
             <LoginForm open = {open}>
-                 <Button onClick={handleClose} color="primary">Cancel</Button>
+                 <Button onClick={handleClose}  color="primary">Cancel</Button>
             </LoginForm>
         </div>
     )
 }
+
+const mapStateToprops = (state)=>{
+    return {
+        login:state.login
+    }
+}
+
+
+
+export default connect(mapStateToprops,null)(Header)
+
+
+

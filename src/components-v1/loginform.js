@@ -1,4 +1,4 @@
-import { useStyles } from '../utis/loginform'
+import { useStyles,login,sendOtp } from '../utis/loginform'
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
@@ -10,9 +10,9 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import React from 'react';
-import {validate} from '../utis/validateusername'
+import {connect} from 'react-redux';
 
-export default function LoginForm(props) {
+function LoginForm(props) {
 
     //create refs to 
     const [usernameValue,setUserNameValue] = React.useState("");
@@ -43,66 +43,20 @@ export default function LoginForm(props) {
     const [passwordType, setpasswordType] = React.useState("password");
     const [linearprogress, setlinearprogress] = React.useState(false);
 
-    const sendOtp = () => {
-        debugger;
-       setlinearprogress(true)
-       let res = validate(usernameValue);
-       let url;
-       if(res==="email"){
-          url = "http://localhost:8082/api/v1/otp/send/email/"+usernameValue;
-       }
-       else if(res === "mobile"){
-        url  = "http://localhost:8082/api/v1/otp/send/text/"+usernameValue;
-       }
-       else{
-         setlinearprogress(false)
-         return;
-       }
-
-       let response = fetch(url);
-       response.then((res) => {
-           res.text()
-       })
-       .then((data)=>{
-           setlinearprogress(false);
-           console.log(data);
-       })
-       .catch((err)=>{
-           setlinearprogress(false);
-           console.log(err);
-       })
-        
+    const handleOtp = () => {
+       sendOtp(usernameValue,setlinearprogress);
     }
 
-    const login = () => {
-        let loginPayload = {
-            loginType: "",
-            otp: "",
-            username: ""
-          }
-        if(loginTypeSwitch){
-             loginPayload.loginType="OTP";
-             loginPayload.otp=passwordValue;
-             loginPayload.username=usernameValue;
-             console.log(JSON.stringify(loginPayload))
-             const requestOptions = {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(loginPayload)
-            };
-            let  url = "http://localhost:8082/api/v1/user/login";
-           let response =   fetch(url,requestOptions)
+    const handleLogin = () => {
+        let response =  login(loginTypeSwitch,usernameValue,passwordValue);
            response.then((res) => res.json())
            .then((data) => {
-               console.log(data);
+               let token = JSON.parse(data);
+               localStorage.setItem("user",token.jwt);
            })
            .catch((err)=>{
                console.log(err)
            })
-        }
-        
-
-
     }
 
 
@@ -131,7 +85,7 @@ export default function LoginForm(props) {
                 <LinearProgress className={!linearprogress ? classes.displayNone : classes.displayBlock} color="secondary" />
                 <TextField value={usernameValue} onChange={handleUsernameChange} autoFocus margin="dense" id="email-phone" label="Email/Phone*" type="email" variant="outlined" fullWidth
                     InputProps={{
-                        endAdornment: <Button disabled={otpButton} id="otp" color="secondary" onClick={sendOtp} className={!loginTypeSwitch ? classes.displayNone : classes.displayBlock}>Get&nbsp;OTP</Button>
+                        endAdornment: <Button disabled={otpButton} id="otp" color="secondary" onClick={handleOtp} className={!loginTypeSwitch ? classes.displayNone : classes.displayBlock}>Get&nbsp;OTP</Button>
                     }} />
 
                 <TextField value={passwordValue} onChange={passwordChange} margin="dense" id="password" label={passwordTypeLabel}  placeholder={passwordTypePaceholeder} type={passwordType} variant="outlined" fullWidth />
@@ -140,10 +94,19 @@ export default function LoginForm(props) {
 
             <DialogActions>
                 {props.children}
-                <Button onClick={login} color="primary">Login</Button>
+                <Button onClick={handleLogin} color="primary">Login</Button>
             </DialogActions>
 
         </Dialog>
     )
 
 }
+
+const mapDispatcherToProps = dispatch => {
+    const res = {type:"LOGGED_IN",value:true};
+    return {
+        loggedin : () => dispatch(res)
+    }
+}
+
+export default connect(null,mapDispatcherToProps)(LoginForm)
