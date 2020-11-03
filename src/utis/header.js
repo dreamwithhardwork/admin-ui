@@ -19,5 +19,11 @@ export const useStyles = makeStyles((theme) => ({
     },
     displayNone: {
         display: "none"
+    },
+
+    avatar: {
+        marginLeft: theme.spacing(4),
     }
+
+    
 }));

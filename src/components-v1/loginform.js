@@ -11,6 +11,7 @@ import Switch from '@material-ui/core/Switch';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import React from 'react';
 import {connect} from 'react-redux';
+import CustomizedSnackbars from '../components-v1/tostmessage';
 
 function LoginForm(props) {
 
@@ -18,22 +19,39 @@ function LoginForm(props) {
     const [usernameValue,setUserNameValue] = React.useState("");
     const [otpButton,setOtpButton] = React.useState(true);
     const [passwordValue, setPasswordValue] = React.useState("");
-
+    const [loginButton,setLoginButton] = React.useState(true);
+    const [passwordFieldDisplay,setPasswordFieldDisplay] = React.useState({display:"block"});
+    const [toastOpen,setToastOpen] = React.useState(false);
+    const [toastMessageSeverity, setToastMessageSeverity] = React.useState("success");
+    const [toastMessage, setToastMessage] = React.useState("sucess");
+    const handleToastClose = (event, reason) => {
+        if (reason === 'clickaway') {
+          return;
+        }
+    
+        setToastOpen(false);
+      };
 
     const classes = useStyles();
     const handleClose = () => {
         console.log("This is working ")
     };
 
-    const [loginTypeSwitch, setloginTypeSwitch] = React.useState(false);
-    const handleLoginType = (event) => {
-        setloginTypeSwitch(event.target.checked);
+    const reset =() => {
         setUserNameValue("");
         setPasswordValue("");
         setOtpButton(true);
-        passwordTypeLabel === "OTP*" ? setpasswordTypeLabel("Password*") : setpasswordTypeLabel("OTP*")
-        passwordTypePaceholeder === "" ? setpasswordTypePaceholeder("__ __ __ __") : setpasswordTypePaceholeder("");
-        passwordType === "password" ? setpasswordType("number") : setpasswordType("password");
+    }
+
+    const [loginTypeSwitch, setloginTypeSwitch] = React.useState(false);
+    const handleLoginType = (event) => {
+        let otpType = event.target.checked;
+        setloginTypeSwitch(otpType);
+        reset();
+        !otpType ? setpasswordTypeLabel("Password*") : setpasswordTypeLabel("OTP*")
+        otpType ? setpasswordTypePaceholeder("__ __ __ __") : setpasswordTypePaceholeder("");
+        otpType ? setpasswordType("number") : setpasswordType("password");
+        otpType ? setPasswordFieldDisplay({display:"none"}) : setPasswordFieldDisplay({display:"block"})
         //variantType === "outlined" ? setvariantType("outlined") : setvariantType("outlined");
     }
 
@@ -44,15 +62,16 @@ function LoginForm(props) {
     const [linearprogress, setlinearprogress] = React.useState(false);
 
     const handleOtp = () => {
-       sendOtp(usernameValue,setlinearprogress);
+       sendOtp(usernameValue,setlinearprogress,setPasswordFieldDisplay,setToastOpen,setToastMessage,setToastMessageSeverity);
+       //props.loggedin();
     }
 
     const handleLogin = () => {
         let response =  login(loginTypeSwitch,usernameValue,passwordValue);
            response.then((res) => res.json())
            .then((data) => {
-               let token = JSON.parse(data);
-               localStorage.setItem("user",token.jwt);
+               //let token = JSON.parse(data);
+               //localStorage.setItem("user",token.jwt);
            })
            .catch((err)=>{
                console.log(err)
@@ -88,15 +107,15 @@ function LoginForm(props) {
                         endAdornment: <Button disabled={otpButton} id="otp" color="secondary" onClick={handleOtp} className={!loginTypeSwitch ? classes.displayNone : classes.displayBlock}>Get&nbsp;OTP</Button>
                     }} />
 
-                <TextField value={passwordValue} onChange={passwordChange} margin="dense" id="password" label={passwordTypeLabel}  placeholder={passwordTypePaceholeder} type={passwordType} variant="outlined" fullWidth />
+                <TextField  style={{...passwordFieldDisplay}}  value={passwordValue} onChange={passwordChange} margin="dense" id="password" label={passwordTypeLabel}  placeholder={passwordTypePaceholeder} type={passwordType} variant="outlined" fullWidth />
             </DialogContent>
 
 
             <DialogActions>
-                {props.children}
-                <Button onClick={handleLogin} color="primary">Login</Button>
+                <Button onClick={() => {props.close();reset();}} color="primary">Cancel</Button>
+                <Button disabled={loginButton} onClick={handleLogin} color="primary">Login</Button>
             </DialogActions>
-
+            <CustomizedSnackbars  open={toastOpen} close={handleToastClose} severity={toastMessageSeverity} message={toastMessage} />
         </Dialog>
     )
 

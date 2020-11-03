@@ -34,15 +34,15 @@ export const useStyles = makeStyles((theme) => ({
   }
 
 
-  export const sendOtp = (usernameValue,setlinearprogress) => {
-    setlinearprogress(true)
+  export const sendOtp = (usernameValue,setlinearprogress,setPasswordFieldDisplay,setToastOpen,setToastMessage, setToastMessageSeverity) => {
+    setlinearprogress(true);
     let res = validate(usernameValue);
     let url;
     if(res==="email"){
        url = "http://localhost:8082/api/v1/otp/send/email/"+usernameValue;
     }
     else if(res === "mobile"){
-     url  = "http://localhost:8082/api/v1/otp/send/text/"+usernameValue;
+       url  = "http://localhost:8082/api/v1/otp/send/text/"+usernameValue;
     }
     else{
       setlinearprogress(false)
@@ -55,11 +55,17 @@ export const useStyles = makeStyles((theme) => ({
     })
     .then((data)=>{
         setlinearprogress(false);
+        setPasswordFieldDisplay({display:"block"})
+        setToastMessageSeverity("success");
+        setToastMessage("otp sent to your mobile/email !!")
         console.log(data);
     })
     .catch((err)=>{
         setlinearprogress(false);
+        setToastOpen(true)
         console.log(err);
+        setToastMessageSeverity("error");
+        setToastMessage("failed to send otp !!")
     })
   }
 

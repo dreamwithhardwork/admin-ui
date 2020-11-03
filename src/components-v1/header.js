@@ -5,22 +5,25 @@ import Typography from '@material-ui/core/Typography';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import Button from '@material-ui/core/Button';
-import {useStyles} from '../utis/header';
+import { useStyles } from '../utis/header';
 import LoginForm from './loginform';
-import {connect} from 'react-redux';
+import { connect } from 'react-redux';
+import UserProfile from '../components-v1/userprofile';
 
 
 
 
- function Header(props) {
+
+function Header(props) {
     const classes = useStyles()
-    const [open,setOpen] = React.useState(false)
+    const [open, setOpen] = React.useState(false)
     const handleClickOpen = () => {
         setOpen(true)
-      }
+    }
     const handleClose = () => {
         setOpen(false);
     }
+
     return (
         <div className={classes.root}>
             <AppBar position="sticky">
@@ -30,27 +33,26 @@ import {connect} from 'react-redux';
                         <MenuIcon />
                     </IconButton>
                     <Typography variant="h6" className={classes.title}></Typography>
-                    
-                    <Button color="inherit" className={props.login?classes.displayNone:classes.displayBlock} onClick={handleClickOpen}>Login</Button>
+                    {
+                        props.login ? <UserProfile /> : <Button color="inherit" className={props.login ? classes.displayNone : classes.displayBlock} onClick={handleClickOpen}>Login</Button>
+                    }
+
                 </Toolbar>
             </AppBar>
-       
-            <LoginForm open = {open}>
-                 <Button onClick={handleClose}  color="primary">Cancel</Button>
-            </LoginForm>
+            <LoginForm open={open} close={handleClose} />
         </div>
     )
 }
 
-const mapStateToprops = (state)=>{
+const mapStateToprops = (state) => {
     return {
-        login:state.login
+        login: state.login
     }
 }
 
 
 
-export default connect(mapStateToprops,null)(Header)
+export default connect(mapStateToprops, null)(Header)
 
 
 
