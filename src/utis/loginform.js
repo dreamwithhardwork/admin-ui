@@ -1,8 +1,8 @@
 import { makeStyles } from '@material-ui/core/styles';
-import { loginPayload } from '../payloads/payloads';
+import { loginPayload,addAuthHeader } from '../payloads/payloads';
 import { validate } from '../utis/validateusername';
 import { LOGIN_TYPE } from '../payloads/constants';
-import {OTP,LOGIN_SIGNUP} from '../properties/serviceurls'
+import {OTP,LOGIN_SIGNUP,USERDETAILS_URL} from '../properties/serviceurls';
 
 export const useStyles = makeStyles((theme) => ({
   root: {
@@ -30,11 +30,18 @@ export const useStyles = makeStyles((theme) => ({
 
 
 
-export const login = (isotpLogin, usernameValue, passwordValue,setBackDrop,setToastOpen,setToastMessageSeverity,setToastMessage,loggedIn,closed) => {
-  if (isotpLogin)
-    return otpLogin(usernameValue, passwordValue,setBackDrop,setToastOpen,setToastMessageSeverity,setToastMessage,loggedIn,closed);
-  else
-    return passwordLogin(usernameValue, passwordValue,setBackDrop,setToastOpen,setToastMessageSeverity,setToastMessage,loggedIn);
+export const login = (isotpLogin, usernameValue, passwordValue,setBackDrop,setToastOpen,setToastMessageSeverity,setToastMessage,loggedIn,closed,getUser) => {
+  if (isotpLogin){
+    loginPayload.loginType="OTP"
+    loginPayload.otp = passwordValue;
+  }
+    
+  else{
+    loginPayload.loginType="PASSWORD"
+    loginPayload.password=passwordValue;
+  }
+   
+    return userLogin(usernameValue, passwordValue,setBackDrop,setToastOpen,setToastMessageSeverity,setToastMessage,loggedIn,closed,getUser);
 }
 
 
@@ -76,12 +83,30 @@ export const sendOtp = (usernameValue, setlinearprogress, setPasswordFieldDispla
     })
 }
 
+ async function getUserDetails(payload){
+  const requestOptions = {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' }
+  };
+
+  requestOptions.headers.Authorization = "Bearer "+localStorage.getItem("user");
+  console.log(requestOptions)
+   if(payload.loginType == "OTP"){
+    return await fetch(USERDETAILS_URL.MOBILE+payload.username,requestOptions);
+   }
+   else{
+    return await fetch(USERDETAILS_URL.EMAIL+payload.username,requestOptions);
+   }
+}
+
+
+ async function logInError(message){
 
 
 
- function otpLogin(usernameValue, passwordValue,setBackDrop,setToastOpen,setToastMessageSeverity,setToastMessage,loggedIn,close) {
-  loginPayload.loginType = "OTP";
-  loginPayload.otp = passwordValue;
+ }
+
+ function userLogin(usernameValue, passwordValue,setBackDrop,setToastOpen,setToastMessageSeverity,setToastMessage,loggedIn,close,getUser) {
   loginPayload.username = usernameValue;
   console.log(JSON.stringify(loginPayload))
   const requestOptions = {
@@ -91,14 +116,19 @@ export const sendOtp = (usernameValue, setlinearprogress, setPasswordFieldDispla
   };
   let url = LOGIN_SIGNUP.LOGIN;
   let response = fetch(url, requestOptions);
-  response.then((res) => res.json())
-           .then((data) => {
+  response.then((res) => {if(res.status===200) return res.json(); else throw res.json() })
+           .then(async (data) => {
                console.log(data);
                //let token = JSON.parse(data); 
-               localStorage.setItem("user",data.jwt);
-               setBackDrop(false);
-               loggedIn();
-               close();
+               console.log(data);
+                localStorage.setItem("user",data.jwt);
+                let userDetails = await getUserDetails(loginPayload);
+                 userDetails= await userDetails.json();
+                getUser(userDetails)
+                setBackDrop(false);
+                loggedIn();
+                close();
+
            })
            .catch((err)=>{
                console.log(err);
@@ -107,30 +137,4 @@ export const sendOtp = (usernameValue, setlinearprogress, setPasswordFieldDispla
                setToastMessageSeverity("error");
                setToastMessage("Invalid login credntials !!")
            }) 
-}
-
-
- function passwordLogin(usernameValue, passwordValue,setBackDrop,setToastOpen,setToastMessageSeverity,setToastMessage) {
-  loginPayload.loginType = "PASSWORD";
-  loginPayload.password = passwordValue;
-  loginPayload.username = usernameValue;
-  console.log(JSON.stringify(loginPayload))
-  const requestOptions = {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(loginPayload)
-  };
-  let url = LOGIN_SIGNUP.LOGIN;
-  console.log(url)
-  let response = fetch(url, requestOptions);
-  response.then((res) => res.json())
-           .then((data) => {
-               //let token = JSON.parse(data);
-               //localStorage.setItem("user",token.jwt);
-               setBackDrop(false);
-           })
-           .catch((err)=>{
-               console.log(err);
-               setBackDrop(true);
-           })
 }

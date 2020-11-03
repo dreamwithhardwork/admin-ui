@@ -75,7 +75,7 @@ function LoginForm(props) {
     const handleLogin = () => {
         setBackDrop(true);
         login(loginTypeSwitch,usernameValue,passwordValue,setBackDrop,setToastOpen,setToastMessageSeverity,
-            setToastMessage,props.loggedin,props.close);
+            setToastMessage,props.loggedin,props.close,props.getUser);
             reset();
     }
 
@@ -131,10 +131,18 @@ function LoginForm(props) {
 }
 
 const mapDispatcherToProps = dispatch => {
-    const res = {type:"LOGGED_IN",value:true};
+    let res;
     return {
-        loggedin : () => dispatch(res)
+        loggedin : () =>{res = {type:"LOGGED_IN",value:true}; dispatch(res)},
+        getUser: (userDetails) => {res = {type:"USER_DETAILS", value:userDetails};dispatch(res);}
     }
 }
 
-export default connect(null,mapDispatcherToProps)(LoginForm)
+
+const mapStateToProps = state => {
+    return {
+        ...state
+    }
+}
+
+export default connect(mapStateToProps,mapDispatcherToProps)(LoginForm)

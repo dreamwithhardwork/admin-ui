@@ -9,3 +9,7 @@ export const LOGIN_SIGNUP = {
       SIGNUP: process.env.REACT_APP_USER_OTP+"/api/v1/user/signup"
 }
 
+export const USERDETAILS_URL = {
+    MOBILE: process.env.REACT_APP_USER_DETAILS+"/api/v1/admin/registered/users/mobile/",
+    EMAIL: process.env.REACT_APP_USER_DETAILS+"/api/v1/admin/registered/users/email/"
+}

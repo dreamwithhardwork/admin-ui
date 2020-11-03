@@ -1,7 +1,8 @@
 import ACTIONS from './actions'
 
 const initialState = {
-    login:false
+    login:false,
+    userDetails: {}
 }
 
 function  initalSetup(){
@@ -24,6 +25,9 @@ const rootReducer = (state = initialState, action) => {
     let newstate = { ...state };
     if (action.type === ACTIONS.LOGGED_IN) {
         newstate.login = action.value;
+    }
+    else if (action.type === ACTIONS.USER_DETAILS){
+      newstate.userDetails = action.value;
     }
     console.log(newstate)
     return newstate;

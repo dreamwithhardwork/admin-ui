@@ -12,13 +12,16 @@ import { useStyles } from '../utis/header';
 import NotificationsActiveIcon from '@material-ui/icons/NotificationsActive';
 import {connect} from 'react-redux';
 import SimpleBackdrop from '../components-v1/backdrop';
-import { Link } from 'react-router-dom';
+import { Link,useHistory } from 'react-router-dom';
+import MakeIcon from '../passport.png';
+
 
 
 
 function UserProfile(props) {
 
     const classes = useStyles()
+    const history = useHistory()
     //
     const defaultProps = {
         color: 'secondary',
@@ -31,6 +34,7 @@ function UserProfile(props) {
     };
 
     const handlepClose = (event) => {
+        console.log(props)
         if (anchorRef.current && anchorRef.current.contains(event.target)) {
             return;
         }
@@ -66,7 +70,7 @@ function UserProfile(props) {
                 aria-controls={popen ? 'menu-list-grow' : undefined}
                 aria-haspopup="true"
                 onClick={handleToggle}
-                className={classes.avatar} src="/broken-image.jpg"></Avatar>
+                className={classes.avatar} src={"/broken-image.jpg"}></Avatar>
             <Popper open={popen} anchorEl={anchorRef.current} role={undefined} transition disablePortal>
                 {({ TransitionProps, placement }) => (
                     <Grow
@@ -76,12 +80,12 @@ function UserProfile(props) {
                         <Paper>
                             <ClickAwayListener onClickAway={handlepClose}>
                                 <MenuList autoFocusItem={popen} id="menu-list-grow" onKeyDown={handleListKeyDown}>
-                                    <MenuItem></MenuItem>
-                                    <MenuItem onClick={handlepClose}>Srikanth bathi</MenuItem>
+                                    <div style={{display:"flex",justifyContent:"center"}}>
+                                    <Avatar src={props.userDetails.profilePic}></Avatar>
+                                    </div>
+                                     <MenuItem style={{textAlign:"center"}} onClick={handlepClose}>{props.userDetails.name.charAt(0).toUpperCase()+props.userDetails.name.slice(1)}</MenuItem>
                                     <MenuItem onClick={handlepClose}>My account</MenuItem>
-                                    <Link to ="/">
                                     <MenuItem onClick={(event) => {handleLogout(event)}}>Logout</MenuItem>
-                                    </Link>
                                 </MenuList>
                             </ClickAwayListener>
                         </Paper>
@@ -99,4 +103,10 @@ const mapDispatcherToProps = dispatch => {
     }
 }
 
-export default connect(null,mapDispatcherToProps)(UserProfile)
+const mapStateToProps = state => {
+    return {
+        ...state
+    }
+}
+
+export default connect(mapStateToProps,mapDispatcherToProps)(UserProfile)
