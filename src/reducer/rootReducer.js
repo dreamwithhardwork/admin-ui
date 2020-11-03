@@ -5,10 +5,11 @@ const initialState = {
 }
 
 async function  initalSetup(){
+    console.log(process.env)
   let token = localStorage.getItem("user");
   if(token===undefined || token===null)
    {
-       
+
    }
    else{
        initialState.login = true;

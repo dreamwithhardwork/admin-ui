@@ -12,6 +12,7 @@ import LinearProgress from '@material-ui/core/LinearProgress';
 import React from 'react';
 import {connect} from 'react-redux';
 import CustomizedSnackbars from '../components-v1/tostmessage';
+import BackDrop from '../components-v1/backdrop';
 
 function LoginForm(props) {
 
@@ -24,6 +25,10 @@ function LoginForm(props) {
     const [toastOpen,setToastOpen] = React.useState(false);
     const [toastMessageSeverity, setToastMessageSeverity] = React.useState("success");
     const [toastMessage, setToastMessage] = React.useState("sucess");
+    const [backdrop, setBackDrop] = React.useState(false);
+    const handleBackdropClose = () => {
+      setBackDrop(false);
+    };
     const handleToastClose = (event, reason) => {
         if (reason === 'clickaway') {
           return;
@@ -41,6 +46,7 @@ function LoginForm(props) {
         setUserNameValue("");
         setPasswordValue("");
         setOtpButton(true);
+        setLoginButton(true);
     }
 
     const [loginTypeSwitch, setloginTypeSwitch] = React.useState(false);
@@ -67,15 +73,8 @@ function LoginForm(props) {
     }
 
     const handleLogin = () => {
-        let response =  login(loginTypeSwitch,usernameValue,passwordValue);
-           response.then((res) => res.json())
-           .then((data) => {
-               //let token = JSON.parse(data);
-               //localStorage.setItem("user",token.jwt);
-           })
-           .catch((err)=>{
-               console.log(err)
-           })
+        setBackDrop(true);
+        login(loginTypeSwitch,usernameValue,passwordValue,setBackDrop);
     }
 
 
@@ -88,13 +87,17 @@ function LoginForm(props) {
     }
 
     const passwordChange = (event) => {
+        let value = event.target.value;
+        if(value.length >3)
+        {
+            setLoginButton(false)
+        }
         setPasswordValue(event.target.value)
     }
 
 
     return (
         <Dialog open={props.open} onClose={handleClose} maxWidth={"xs"} fullWidth={true} aria-labelledby="form-dialog-title">
-
             <DialogTitle id="form-dialog-title">Login/Signup</DialogTitle>
 
             <DialogContent>
@@ -115,7 +118,11 @@ function LoginForm(props) {
                 <Button onClick={() => {props.close();reset();}} color="primary">Cancel</Button>
                 <Button disabled={loginButton} onClick={handleLogin} color="primary">Login</Button>
             </DialogActions>
+
+
+            <BackDrop open ={backdrop} close ={handleBackdropClose}></BackDrop>
             <CustomizedSnackbars  open={toastOpen} close={handleToastClose} severity={toastMessageSeverity} message={toastMessage} />
+            
         </Dialog>
     )
 

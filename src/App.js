@@ -13,9 +13,7 @@ function App() {
   return (
     <Provider store={store}>
 
-    
     <div className="App">
-
       {/*-------------------- header section -------------------------*/}
        <Header></Header>
 
