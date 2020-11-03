@@ -4,10 +4,11 @@ const initialState = {
     login:false
 }
 
-async function  initalSetup(){
-    console.log(process.env)
+function  initalSetup(){
+  console.log(process.env)
   let token = localStorage.getItem("user");
-  if(token===undefined || token===null)
+  debugger;
+  if(token==="undefined" || token === undefined || token===null)
    {
 
    }

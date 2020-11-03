@@ -74,7 +74,9 @@ function LoginForm(props) {
 
     const handleLogin = () => {
         setBackDrop(true);
-        login(loginTypeSwitch,usernameValue,passwordValue,setBackDrop);
+        login(loginTypeSwitch,usernameValue,passwordValue,setBackDrop,setToastOpen,setToastMessageSeverity,
+            setToastMessage,props.loggedin,props.close);
+            reset();
     }
 
 

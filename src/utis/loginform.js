@@ -30,11 +30,11 @@ export const useStyles = makeStyles((theme) => ({
 
 
 
-export const login = (isotpLogin, usernameValue, passwordValue,setBackDrop) => {
+export const login = (isotpLogin, usernameValue, passwordValue,setBackDrop,setToastOpen,setToastMessageSeverity,setToastMessage,loggedIn,closed) => {
   if (isotpLogin)
-    return otpLogin(usernameValue, passwordValue,setBackDrop);
+    return otpLogin(usernameValue, passwordValue,setBackDrop,setToastOpen,setToastMessageSeverity,setToastMessage,loggedIn,closed);
   else
-    return passwordLogin(usernameValue, passwordValue,setBackDrop);
+    return passwordLogin(usernameValue, passwordValue,setBackDrop,setToastOpen,setToastMessageSeverity,setToastMessage,loggedIn);
 }
 
 
@@ -63,10 +63,10 @@ export const sendOtp = (usernameValue, setlinearprogress, setPasswordFieldDispla
   })
     .then((data) => {
       setlinearprogress(false);
-      setPasswordFieldDisplay({ display: "block" })
+      setPasswordFieldDisplay({ display: "block" });
       setToastMessageSeverity("success");
-      setToastMessage("otp sent to your mobile/email !!")
-      console.log(data);
+      setToastMessage("otp sent to your mobile/email !!");
+      setToastOpen(true);
     })
     .catch((err) => {
       setlinearprogress(false);
@@ -79,7 +79,7 @@ export const sendOtp = (usernameValue, setlinearprogress, setPasswordFieldDispla
 
 
 
- function otpLogin(usernameValue, passwordValue) {
+ function otpLogin(usernameValue, passwordValue,setBackDrop,setToastOpen,setToastMessageSeverity,setToastMessage,loggedIn,close) {
   loginPayload.loginType = "OTP";
   loginPayload.otp = passwordValue;
   loginPayload.username = usernameValue;
@@ -90,11 +90,27 @@ export const sendOtp = (usernameValue, setlinearprogress, setPasswordFieldDispla
     body: JSON.stringify(loginPayload)
   };
   let url = LOGIN_SIGNUP.LOGIN;
-  return fetch(url, requestOptions)
+  let response = fetch(url, requestOptions);
+  response.then((res) => res.json())
+           .then((data) => {
+               console.log(data);
+               //let token = JSON.parse(data); 
+               localStorage.setItem("user",data.jwt);
+               setBackDrop(false);
+               loggedIn();
+               close();
+           })
+           .catch((err)=>{
+               console.log(err);
+               setBackDrop(false);
+               setToastOpen(true)
+               setToastMessageSeverity("error");
+               setToastMessage("Invalid login credntials !!")
+           }) 
 }
 
 
- function passwordLogin(usernameValue, passwordValue,setBackDrop) {
+ function passwordLogin(usernameValue, passwordValue,setBackDrop,setToastOpen,setToastMessageSeverity,setToastMessage) {
   loginPayload.loginType = "PASSWORD";
   loginPayload.password = passwordValue;
   loginPayload.username = usernameValue;

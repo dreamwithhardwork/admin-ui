@@ -10,10 +10,13 @@ import MenuItem from '@material-ui/core/MenuItem';
 import MenuList from '@material-ui/core/MenuList';
 import { useStyles } from '../utis/header';
 import NotificationsActiveIcon from '@material-ui/icons/NotificationsActive';
+import {connect} from 'react-redux';
+import SimpleBackdrop from '../components-v1/backdrop';
+import { Link } from 'react-router-dom';
 
 
 
-export default function UserProfile(props) {
+function UserProfile(props) {
 
     const classes = useStyles()
     //
@@ -49,6 +52,11 @@ export default function UserProfile(props) {
         prevOpen.current = popen;
     }, [popen]);
 
+    function handleLogout(event){
+      localStorage.setItem("user",undefined);
+      handlepClose(event);
+      props.loggedin();
+    }
     //
 
     return (
@@ -71,7 +79,9 @@ export default function UserProfile(props) {
                                     <MenuItem></MenuItem>
                                     <MenuItem onClick={handlepClose}>Srikanth bathi</MenuItem>
                                     <MenuItem onClick={handlepClose}>My account</MenuItem>
-                                    <MenuItem onClick={handlepClose}>Logout</MenuItem>
+                                    <Link to ="/">
+                                    <MenuItem onClick={(event) => {handleLogout(event)}}>Logout</MenuItem>
+                                    </Link>
                                 </MenuList>
                             </ClickAwayListener>
                         </Paper>
@@ -81,3 +91,12 @@ export default function UserProfile(props) {
         </React.Fragment>
     )
 }
+
+const mapDispatcherToProps = dispatch => {
+    const res = {type:"LOGGED_IN",value:false};
+    return {
+        loggedin : () => dispatch(res)
+    }
+}
+
+export default connect(null,mapDispatcherToProps)(UserProfile)
