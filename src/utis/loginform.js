@@ -40,8 +40,9 @@ export const login = (isotpLogin, usernameValue, passwordValue,setBackDrop,setTo
     loginPayload.loginType="PASSWORD"
     loginPayload.password=passwordValue;
   }
-   
-    return userLogin(usernameValue, passwordValue,setBackDrop,setToastOpen,setToastMessageSeverity,setToastMessage,loggedIn,closed,getUser);
+   let userName = usernameValue.replace(/\s/g,"");
+   userName = userName.toLowerCase();
+  return userLogin(userName, passwordValue,setBackDrop,setToastOpen,setToastMessageSeverity,setToastMessage,loggedIn,closed,getUser);
 }
 
 
